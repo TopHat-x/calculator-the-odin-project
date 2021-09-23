@@ -1,0 +1,31 @@
+body{
+    display:flex;
+    justify-content: center;
+}
+
+#calculator{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 100px;
+    height: 600px;
+    width: 500px;
+    background-color: gray;
+}
+
+#screen{
+    margin: 50px;
+    height: 100px;
+    width: 400px;
+    background-color: rgb(144, 179, 144);
+}
+
+
+button{
+    height: 75px;
+    width: 75px;
+}
+
+.wide-btn{
+    width: 150px;
+}
