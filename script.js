@@ -50,7 +50,7 @@ const getText = () => screenText.textContent;
 setText("0");
 
 
-let displayState = "zero"; // States: zero, oneNum, numOp, twoNumOp, afterEq
+let displayState = "zero"; // States: zero, oneNum, numOp, twoNumOp, afterEq, error
 let valOne = null;
 let valTwo = null;
 let solution = null;
@@ -109,7 +109,9 @@ function roundNumber(num){
 function populateDisplay(valIn, valType){
     switch(displayState){
         case "zero":
-            if(valIn === "."){
+            if(valIn === "0"){
+                break;
+            } else if(valIn === "."){
                 setText(getText() + valIn);
                 valOne = "0.";
                 displayState = "oneNum";
@@ -126,7 +128,14 @@ function populateDisplay(valIn, valType){
             break;
 
         case "oneNum":
-            if(valIn === "." && valOne.indexOf(".") !== -1){
+            if(getText().length > 12){
+                setText("Too long!");
+                solution = null;
+                valOne = null;
+                valTwo = null;
+                operator = null;
+                displayState = "error";
+            } else if(valIn === "." && valOne.indexOf(".") !== -1){
                 break;
             } else if(valType === "num"){
                 setText(getText() + valIn);
@@ -139,7 +148,14 @@ function populateDisplay(valIn, valType){
             break;
 
         case "numOp":
-            if(valIn === "."){
+            if(getText().length > 12 && valType === "num"){
+                setText("Too long!");
+                solution = null;
+                valOne = null;
+                valTwo = null;
+                operator = null;
+                displayState = "error";
+            } else if(valIn === "."){
                 valTwo = "0.";
                 setText(getText() + valTwo);
                 displayState = "twoNumOp";
@@ -151,7 +167,16 @@ function populateDisplay(valIn, valType){
             break;
 
         case "twoNumOp":
-            if(valIn === "." && valTwo.indexOf(".") !== -1){
+            if(valIn === "0" && valTwo === "0"){
+                break;
+            } else if(getText().length > 12 && valType === "num"){
+                setText("Too long!");
+                solution = null;
+                valOne = null;
+                valTwo = null;
+                operator = null;
+                displayState = "error";
+            } else if(valIn === "." && valTwo.indexOf(".") !== -1){
                 break;
             } else if(valType === "num"){
                 setText(getText() + valIn);
@@ -163,14 +188,23 @@ function populateDisplay(valIn, valType){
                     valOne = null;
                     valTwo = null;
                     operator = null;
-                    displayState = "zero";
+                    displayState = "error";
                 } else {
                     solution = operate(operator, valOne, valTwo);
-                    setText(solution + valIn);
-                    valOne = solution;
-                    valTwo = null;
-                    operator = valIn;
-                    displayState = "numOp";
+                    if(solution.length > 12){
+                        setText("Too long!");
+                        solution = null;
+                        valOne = null;
+                        valTwo = null;
+                        operator = null;
+                        displayState = "error";
+                    } else {
+                        setText(solution + valIn);
+                        valOne = solution;
+                        valTwo = null;
+                        operator = valIn;
+                        displayState = "numOp";
+                    }
                 }
             } else if(valType === "eq"){
                 if(valTwo === "0" && operator === "/"){
@@ -179,20 +213,40 @@ function populateDisplay(valIn, valType){
                     valTwo = null;
                     solution = null;
                     operator = null;
-                    displayState = "zero";
+                    displayState = "error";
                 } else {
                     solution = operate(operator, valOne, valTwo);
-                    setText(solution);
-                    valOne = solution;
-                    valTwo = null;
-                    operator = null;
-                    displayState = "afterEq";
+                    if(solution.length > 12){
+                        setText("Too long!");
+                        solution = null;
+                        valOne = null;
+                        valTwo = null;
+                        operator = null;
+                        displayState = "error";
+                    } else {
+                        setText(solution);
+                        valOne = solution;
+                        displayState = "afterEq";
+                    }
                 }
             }
             break;
 
         case "afterEq":
-            if(valIn === "."){
+            if(valIn === "="){
+                solution = operate(operator, valOne, valTwo);
+                if(solution.length > 12){
+                    setText("Too long!");
+                    solution = null;
+                    valOne = null;
+                    valTwo = null;
+                    operator = null;
+                    displayState = "error";
+                } else {
+                    setText(solution);
+                    valOne = solution;
+                }
+            } else if(valIn === "."){
                 valOne = "0.";
                 setText(valOne);
                 displayState = "oneNum";
@@ -205,6 +259,9 @@ function populateDisplay(valIn, valType){
                 displayState = "numOp";
                 operator = valIn;
             }
+            break;
+        
+        case "error":
             break;
     }
 }
