@@ -1,3 +1,4 @@
+//#region Buttons
 const btn0 = document.querySelector("#btn0");
 const btn1 = document.querySelector("#btn1");
 const btn2 = document.querySelector("#btn2");
@@ -36,98 +37,223 @@ btnEqual.addEventListener('click', () => {populateDisplay("=", "eq")});
 btnClear.addEventListener('click', () => {clearDisplay()});
 btnBackSpace.addEventListener('click', () => {backSpace()});
 
+//#endregion
+
+//#region Keys
+
+
+//#endregion
+
 const screenText = document.querySelector("#screen-text");
 const setText = (string) => screenText.textContent = string;
 const getText = () => screenText.textContent;
 setText("0");
 
-let displayState = "zero"; // States: zero, oneNum, numOp, twoNumOp
+
+let displayState = "zero"; // States: zero, oneNum, numOp, twoNumOp, afterEq
+let valOne = null;
+let valTwo = null;
+let solution = null;
+let operator = null;
 
 
 function add(num1, num2){
-    return num1 + num2;
+    return parseFloat(num1) + parseFloat(num2);
 }
 
 function subtract(num1, num2){
-    return num1 - num2;
+    return parseFloat(num1) - parseFloat(num2);
 }
 
 function multiply(num1, num2){
-    return num1 * num2;
+    return parseFloat(num1) * parseFloat(num2);
 }
 
 function divide(num1, num2){
-    return num1 / num2;
+    return parseFloat(num1) / parseFloat(num2);
 }
 
 function operate(operator, num1, num2){
     if(operator === "+"){
-        return add(num1, num2);
+        let result = add(num1, num2);
+        return roundNumber(result); 
     } else if(operator === "-"){
-        return subtract(num1, num2);
-    } else if(operator === "*"){
-        return multiply(num1, num2);
+        let result = subtract(num1, num2);
+        return roundNumber(result); 
+    } else if(operator === "x"){
+        let result = multiply(num1, num2);
+        return roundNumber(result); 
     } else if(operator === "/"){
-        return divide(num1, num2);
+        let result = divide(num1, num2);
+        return roundNumber(result); 
     } else {
         console.log("Invalid operator");
         return;
     }
 }
 
+function roundNumber(num){
+    result = Math.round(num * 100) / 100;
+    result = result.toString();
+    if(result.indexOf(".") !== -1){
+        for(i = 0; i < 3; i++){
+            if(result[result.length-1] === "0" || result[result.length-1] === "."){
+                result = result.substring(0,result.length - 2);
+            }
+        }
+    }
+
+    return result;
+}
+
 function populateDisplay(valIn, valType){
     switch(displayState){
         case "zero":
-            if(valType === "num"){
+            if(valIn === "."){
+                setText(getText() + valIn);
+                valOne = "0.";
+                displayState = "oneNum";
+            } else if(valType === "num"){
                 setText(valIn);
                 displayState = "oneNum";
+                valOne = valIn;
+            } else if(valType === "op"){
+                setText(getText() + valIn);
+                valOne = 0;
+                displayState = "numOp";
+                operator = valIn;
             }
             break;
+
         case "oneNum":
-            if(valType === "num"){
+            if(valIn === "." && valOne.indexOf(".") !== -1){
+                break;
+            } else if(valType === "num"){
                 setText(getText() + valIn);
+                valOne += valIn;
             } else if(valType === "op"){
                 setText(getText() + valIn);
                 displayState = "numOp"
+                operator = valIn;
             }
             break;
+
         case "numOp":
-            if(valType === "num"){
+            if(valIn === "."){
+                valTwo = "0.";
+                setText(getText() + valTwo);
+                displayState = "twoNumOp";
+            } else if(valType === "num"){
                 setText(getText() + valIn);
+                valTwo = valIn;
                 displayState = "twoNumOp";
             }
             break;
+
         case "twoNumOp":
-            if(valType === "num"){
+            if(valIn === "." && valTwo.indexOf(".") !== -1){
+                break;
+            } else if(valType === "num"){
                 setText(getText() + valIn);
+                valTwo += valIn;
             } else if(valType === "op"){
-                showResult();
+                if(valTwo === "0" && operator === "/"){
+                    setText(">:(");
+                    solution = null;
+                    valOne = null;
+                    valTwo = null;
+                    operator = null;
+                    displayState = "zero";
+                } else {
+                    solution = operate(operator, valOne, valTwo);
+                    setText(solution + valIn);
+                    valOne = solution;
+                    valTwo = null;
+                    operator = valIn;
+                    displayState = "numOp";
+                }
+            } else if(valType === "eq"){
+                if(valTwo === "0" && operator === "/"){
+                    setText(">:(");
+                    valOne = null;
+                    valTwo = null;
+                    solution = null;
+                    operator = null;
+                    displayState = "zero";
+                } else {
+                    solution = operate(operator, valOne, valTwo);
+                    setText(solution);
+                    valOne = solution;
+                    valTwo = null;
+                    operator = null;
+                    displayState = "afterEq";
+                }
+            }
+            break;
+
+        case "afterEq":
+            if(valIn === "."){
+                valOne = "0.";
+                setText(valOne);
+                displayState = "oneNum";
+            } else if(valType === "num"){
+                setText(valIn);
+                valOne = valIn;
+                displayState = "oneNum"; 
+            } else if(valType === "op"){
                 setText(getText() + valIn);
                 displayState = "numOp";
-            } else if(valType === "eq"){
-                showResult();
-                displayState = "oneNum";
+                operator = valIn;
             }
             break;
     }
 }
 
 function clearDisplay(){
+    valOne = null;
+    valTwo = null;
+    solution = null;
+    operator = null;
     setText(0);
     displayState = "zero";
 }
 
 function backSpace(){
-    if(getText().length === 1){
-        setText(0);
-    } else {
-        setText(getText().substring(0, getText().length -1));
+    switch(displayState){
+        case "zero":
+            break;
+        case "oneNum":
+            if(getText().length === 1){
+                setText(0);
+                displayState = "zero";
+            } else {
+                setText(getText().substring(0,getText().length - 1));
+            }
+            valOne = getText();
+            break;
+
+        case "numOp":
+            setText(getText().substring(0,getText().length - 1));
+            displayState = "oneNum";
+            break;
+
+        case "twoNumOp":
+            if(valTwo.length === 1){
+                displayState = "numOp";
+            } else {
+                valTwo = valTwo.substring(0,valTwo.length - 1);
+            }
+            setText(getText().substring(0,getText().length - 1));
+            break;
+
+        case "afterEq":
+            if(getText().length ===1){
+                setText(0);
+                displayState = "zero";
+            } else {
+                setText(getText().substring(0,getText().length - 1));
+                displayState = "oneNum";
+            }
+            break;
     }
 }
-
-function showResult(){
-    return;
-}
-
-
-
