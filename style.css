@@ -1,6 +1,7 @@
 body{
     display:flex;
     justify-content: center;
+    background-color: rgb(173, 172, 172);
 }
 
 #calculator{
@@ -10,6 +11,8 @@ body{
     justify-content: center;
     margin: 100px;
     background-color: gray;
+    border-radius: 30px;
+    border: solid black 1px;
 }
 
 #screen{
@@ -17,6 +20,8 @@ body{
     height: 100px;
     width: 424px;
     background-color: rgb(144, 179, 144);
+    border-radius: 5px;
+    border: solid black 1px;
 }
 
 #screen-text{
@@ -39,10 +44,28 @@ body{
     gap: 6px;
 }
 
+.op-btn{
+    background-color: rgb(61, 58, 58);
+    color: white;
+}
+
+#btn-clear{
+    background-color: rgb(204, 67, 67);
+    color: white;
+}
+
+#btn-equal{
+    background-color: rgb(240, 158, 50);
+    color: white;
+}
+
 button{
+    border: solid black 1px;
     height: 80px;
     width: 80px;
     font-size: 48px;
+    border-radius: 10px;
+    background-color: rgb(224, 222, 222);
 }
 
 .wide-btn{
